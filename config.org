@@ -1,0 +1,173 @@
+* Set Path
+First we are going to set some path variables. Telling emacs where it
+should look for executables.
+#+BEGIN_SRC emacs-lisp
+(setenv "PATH" (concat (getenv "PATH") ":~/.local/bin/"))
+(setq exec-path (append exec-path '("~/.local/bin/")))
+#+END_SRC 
+
+
+
+;; init.el --- Emacs configuration
+;; INSTALL PACKAGES
+;; --------------------------------------
+
+
+;; --------------------------------------
+;; init.el -- Emacs config
+
+;; MELPA setup and initial packages
+(require 'package)
+
+(add-to-list 'package-archives
+         '("melpa" . "http://melpa.org/packages/")t)
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(package-initialize)
+
+(defvar package-list
+  '(better-defaults 
+    material-theme))
+
+(dolist (p package-list)
+  (when (not (package-installed-p p))
+    (package-install p)))
+
+(package-install 'use-package)
+(require 'use-package)
+
+* exwm
+;;exwm
+(use-package exwm
+  :ensure t
+  :config
+  (require 'exwm-config)
+  (exwm-config-default))
+
+;;theme
+(load-theme 'material t) ;; Load theme: Material
+(global-linum-mode t) ;; Line numbers
+
+* code settings
+** FoxDot mode
+Foxdot mode needs this. This probably won't work in the future, 
+because it is not installed from elpa. It is started with
+M-x load-file
+foxdot-mode
+foxdot-start
+Note: elpy interferes with FoxDot in really annoying ways
+https://gist.github.com/lvm/c84e4d5ca54f1db256eaa6c98db5b141
+#+BEGIN_SRC emacs-lisp
+(defvar foxdot-cli-path "/home/daniel/.local/lib/python3.5/site-packages/")
+#+END_SRC 
+
+** LISP mode
+Will need to install slime and sbcl for this.
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/lisp")
+(load (expand-file-name "~/quicklisp/slime-helper.el")) 
+(setq inferior-lisp-program "sbcl") 
+#+END_SRC 
+
+** ORG languages
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '((python . t)
+    (C . t)
+    (css . t)
+    (haskell . t)
+    (js . t)
+    (latex . t)
+    (lisp . t)
+    (makefile . t)
+    (matlab . t)
+    (perl . t)
+    (picolisp . t)
+    (ruby . t)
+    (scheme . t)
+    (sed . t)
+    (shell . t)
+    (sql . t)
+    (emacs-lisp . t)))
+#+END_SRC
+
+** elpy
+set elpy, but do not turn it on. It interferes with other packages
+#+BEGIN_SRC emacs-lisp
+(defvar myPackages
+  '(better-defaults
+	elpy ;; add elpy
+	material-theme))
+#+END_SRC
+
+** flymake js
+Here we are setting much needed linting for javascript
+#+BEGIN_SRC emacs-lisp
+(setq default-tab-width 4)
+(setq-default c-basic-offset 4)
+(require 'flymake-gjshint)
+  (add-hook 'js-mode-hook 'flymake-gjshint:load)
+#+END_SRC
+
+* browser settings
+settings for the w3m browser
+sets duckduckgo as the default browser
+#+BEGIN_SRC emacs-lisp
+(require 'w3m-search)
+(setq w3m-search-default-engine "duckduckgo")
+#+END_SRC
+
+* toolbar settings
+This sets what we want to see on the modeline
+we show the time with time-mode 1
+we show the bat with battery-mode 1
+#+BEGIN_SRC emacs-lisp
+(setq visible-bell 1)
+(tool-bar-mode -1)
+(toggle-scroll-bar -1)
+(display-time-mode 1)
+(display-battery-mode 1)
+#+END_SRC
+
+* networking
+we set enwc with network manager as the backend this allows us to
+connect to networks
+#+BEGIN_SRC emacs-lisp
+(setq enwc-default-backend 'nm)
+#+END_SRC
+
+* custom usability functions
+This function halves the window directly above and below
+it is bound to C-c v.
+
+#+BEGIN_SRC emacs-lisp
+(defun halve-other-window-height ()
+  "Expand current window to use half of the other window's lines."
+  (interactive)
+  (enlarge-window (/ (window-height (next-window)) 2)))
+
+(global-set-key (kbd "C-c v") 'halve-other-window-height)
+#+END_SRC
+
+This function plays youtube videos from a url in vlc it is not
+bound to any key combo.
+#+BEGIN_SRC emacs-lisp
+(defun play-youtube-video (url)  
+  (interactive "sURL: ")  
+  (shell-command
+   (concat "youtube-dl  -o - " url " | cvlc - &")))
+#+END_SRC
+
+This function plays a youtube video in vlc directly from w3m.
+#+BEGIN_SRC emacs-lisp
+(defun w3m-play-youtube-video ()  
+   (interactive)  
+         (play-youtube-video
+      (w3m-print-this-url (point))))
+(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
+;; init.el ends here
+
+#+END_SRC
