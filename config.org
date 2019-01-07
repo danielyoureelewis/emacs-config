@@ -6,17 +6,11 @@ should look for executables.
 (setq exec-path (append exec-path '("~/.local/bin/")))
 #+END_SRC 
 
-
-
-;; init.el --- Emacs configuration
-;; INSTALL PACKAGES
-;; --------------------------------------
-
-
-;; --------------------------------------
-;; init.el -- Emacs config
-
-;; MELPA setup and initial packages
+* package management
+MELPA setup and initial packages
+Eventually, I want to migrate entirely to use-package
+All new modifications should keep this in mind
+#+BEGIN_SRC emacs-lisp
 (require 'package)
 
 (add-to-list 'package-archives
@@ -27,28 +21,38 @@ should look for executables.
 
 (package-initialize)
 
-(defvar package-list
-  '(better-defaults 
-    material-theme))
-
 (dolist (p package-list)
   (when (not (package-installed-p p))
     (package-install p)))
 
 (package-install 'use-package)
 (require 'use-package)
+#+END_SRC
+* looks
+** exwm
+The emacs window manager! Just using the default config right now.
+#+BEGIN_SRC emacs-lisp
 
-* exwm
-;;exwm
 (use-package exwm
   :ensure t
   :config
   (require 'exwm-config)
   (exwm-config-default))
+#+END_SRC
 
-;;theme
-(load-theme 'material t) ;; Load theme: Material
-(global-linum-mode t) ;; Line numbers
+** theme
+Add the material theme to the package list
+#+BEGIN_SRC emacs-lisp
+(defvar package-list
+  '(better-defaults 
+    material-theme))
+#+END_SRC
+load the theme
+turn on line numbers
+#+BEGIN_SRC emacs-lisp
+(load-theme 'material t)
+(global-linum-mode t)
+#+END_SRC
 
 * code settings
 ** FoxDot mode
