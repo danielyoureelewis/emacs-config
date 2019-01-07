@@ -7,9 +7,9 @@ should look for executables.
 #+END_SRC 
 
 * package management
-MELPA setup and initial packages
-Eventually, I want to migrate entirely to use-package
-All new modifications should keep this in mind
+MELPA setup and initial packages.
+Eventually, I want to migrate entirely to use-package.
+All new modifications should keep this in mind.
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 
@@ -41,28 +41,28 @@ The emacs window manager! Just using the default config right now.
 #+END_SRC
 
 ** theme
-Add the material theme to the package list
+Add the material theme to the package list.
 #+BEGIN_SRC emacs-lisp
 (defvar package-list
   '(better-defaults 
     material-theme))
 #+END_SRC
-load the theme
-turn on line numbers
+Load the theme.
+Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
 (load-theme 'material t)
 (global-linum-mode t)
 #+END_SRC
 
 * code settings
-** FoxDot mode
-Foxdot mode needs this. This probably won't work in the future, 
-because it is not installed from elpa. It is started with
-M-x load-file
-foxdot-mode
-foxdot-start
-Note: elpy interferes with FoxDot in really annoying ways
-https://gist.github.com/lvm/c84e4d5ca54f1db256eaa6c98db5b141
+** FoxDot mode 
+Foxdot mode needs this. This probably won't work in the
+future, because it is not installed from elpa. It is started with:
+**** M-x load-file
+**** foxdot-mode
+**** foxdot-start
+**** Note: elpy interferes with FoxDot in really annoying ways
+**** https://gist.github.com/lvm/c84e4d5ca54f1db256eaa6c98db5b141
 #+BEGIN_SRC emacs-lisp
 (defvar foxdot-cli-path "/home/daniel/.local/lib/python3.5/site-packages/")
 #+END_SRC 
@@ -124,7 +124,7 @@ sets duckduckgo as the default browser
 (setq w3m-search-default-engine "duckduckgo")
 #+END_SRC
 
-* toolbar settings
+* modeline settings
 This sets what we want to see on the modeline
 we show the time with time-mode 1
 we show the bat with battery-mode 1
