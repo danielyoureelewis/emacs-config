@@ -44,7 +44,6 @@ Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
 (global-linum-mode t)
 #+END_SRC
-** menu bar
 ** org
 
 This makes org mode just a bit more readable. Headings are more
@@ -63,6 +62,18 @@ This should darken the background behind code when using org-mode
 (set-face-attribute 'org-block nil :background
                     (color-darken-name
                      (face-attribute 'default :background) 3))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords
+ '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELED")))
+
+(setq org-todo-keyword-faces
+ '(("IN-PROGRESS" . "orange") 
+   ("WAITING" . "magenta") 
+   ("CANCELED" . "red") 
+   ("DONE" . "green")))
+
 #+END_SRC
 
 ** theme
@@ -158,15 +169,16 @@ sets duckduckgo as the default browser
 (setq w3m-search-default-engine "duckduckgo")
 #+END_SRC
 
-* menu settings
-This sets what we want to see on the modeline.
-Turn on visable bellu
+* view settings
+Turn on visable bell
+Disable the menu bar on start up.
 Turn off the big ugly tool-bar.
 Turn off the scroll bar.
 Show the time with time-mode 1
 Show the bat with battery-mode 1
 #+BEGIN_SRC emacs-lisp
 (setq visible-bell 1)
+(menu-bar-mode -1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
 (window-divider-mode 1)
@@ -245,23 +257,9 @@ it is bound to C-c v.
 
 (global-set-key (kbd "C-c v") 'halve-other-window-height)
 #+END_SRC
-** playing media
-This function plays youtube videos from a url in vlc it is not
-bound to any key combo.
-#+BEGIN_SRC emacs-lisp
-(defun play-youtube-video (url)  
-  (interactive "sURL: ")  
-  (shell-command
-   (concat "youtube-dl  -o - " url " | cvlc - &")))
-#+END_SRC
 
-This function plays a youtube video in vlc directly from w3m.
+Set shortcut to cycle buffers
 #+BEGIN_SRC emacs-lisp
-(defun w3m-play-youtube-video ()  
-   (interactive)  
-         (play-youtube-video
-      (w3m-print-this-url (point))))
-(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
-;; init.el ends here
-
+(global-set-key (kbd "C-c c") 'next-buffer)
+(global-set-key (kbd "C-c x") 'previous-buffer)
 #+END_SRC
