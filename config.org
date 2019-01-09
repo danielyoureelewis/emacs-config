@@ -1,4 +1,4 @@
-* Set Path
+* set path
 First we are going to set some path variables. Telling emacs where it
 should look for executables.
 #+BEGIN_SRC emacs-lisp
@@ -32,7 +32,6 @@ All new modifications should keep this in mind.
 ** exwm
 The emacs window manager! Just using the default config right now.
 #+BEGIN_SRC emacs-lisp
-
 (use-package exwm
   :ensure t
   :config
@@ -40,18 +39,39 @@ The emacs window manager! Just using the default config right now.
   (exwm-config-default))
 #+END_SRC
 
-** theme
-Add the material theme to the package list.
-#+BEGIN_SRC emacs-lisp
-(defvar package-list
-  '(better-defaults 
-    material-theme))
-#+END_SRC
-Load the theme.
+** line numbers
 Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
-(load-theme 'material t)
 (global-linum-mode t)
+#+END_SRC
+** menu bar
+** org
+
+This makes org mode just a bit more readable. Headings are more
+stylized so they do not look like the text they contain.
+
+#+BEGIN_SRC emacs-lisp
+(require 'org-bullets)
+(setq org-bullets-bullet-list '("☯" "○" "✸" "✿" "~"))
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+END_SRC
+
+This should darken the background behind code when using org-mode
+
+#+BEGIN_SRC emacs-lisp
+(require 'color)
+(set-face-attribute 'org-block nil :background
+                    (color-darken-name
+                     (face-attribute 'default :background) 3))
+#+END_SRC
+
+** theme
+This should install and set the theme to the nimbus theme.
+https://github.com/m-cat/nimbus-theme
+
+#+BEGIN_SRC emacs-lisp
+(require 'nimbus-theme)
+(load-theme 'nimbus t)
 #+END_SRC
 
 * code settings
@@ -63,6 +83,7 @@ future, because it is not installed from elpa. It is started with:
 **** foxdot-start
 **** Note: elpy interferes with FoxDot in really annoying ways
 **** https://gist.github.com/lvm/c84e4d5ca54f1db256eaa6c98db5b141
+
 #+BEGIN_SRC emacs-lisp
 (defvar foxdot-cli-path "/home/daniel/.local/lib/python3.5/site-packages/")
 #+END_SRC 
@@ -75,7 +96,18 @@ Will need to install slime and sbcl for this.
 (setq inferior-lisp-program "sbcl") 
 #+END_SRC 
 
-** ORG languages
+** ORG mode
+
+It is annoying to get asked about this every time. I figure most
+org mode files I will be using will be my own.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-confirm-babel-evaluate nil)
+#+END_SRC
+
+Probably a bit of overkill, but I want to experiment with org-mode's
+ability to make language interop nicely with each other.
+
 #+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
   'org-babel-load-languages
@@ -100,15 +132,17 @@ Will need to install slime and sbcl for this.
 
 ** elpy
 set elpy, but do not turn it on. It interferes with other packages
+
 #+BEGIN_SRC emacs-lisp
 (defvar myPackages
   '(better-defaults
 	elpy ;; add elpy
-	material-theme))
+	nimbus-theme))
 #+END_SRC
 
 ** flymake js
-Here we are setting much needed linting for javascript
+Here we are setting much needed linting for javascript. I am using
+use-package here. If flymake doesn't work change it back to require.
 #+BEGIN_SRC emacs-lisp
 (setq default-tab-width 4)
 (setq-default c-basic-offset 4)
@@ -124,29 +158,85 @@ sets duckduckgo as the default browser
 (setq w3m-search-default-engine "duckduckgo")
 #+END_SRC
 
-* modeline settings
-This sets what we want to see on the modeline
-we show the time with time-mode 1
-we show the bat with battery-mode 1
+* menu settings
+This sets what we want to see on the modeline.
+Turn on visable bellu
+Turn off the big ugly tool-bar.
+Turn off the scroll bar.
+Show the time with time-mode 1
+Show the bat with battery-mode 1
 #+BEGIN_SRC emacs-lisp
 (setq visible-bell 1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
+(window-divider-mode 1)
 (display-time-mode 1)
 (display-battery-mode 1)
 #+END_SRC
 
+The window divider is useful, but way too big. This function makes some
+much needed adjustments
+#+BEGIN_SRC emacs-lisp
+(when (boundp 'window-divider-mode)
+  (setq window-divider-default-places t
+        window-divider-default-bottom-width 0
+        window-divider-default-right-width 1)
+  (window-divider-mode +1))
+#+END_SRC
+
 * networking
-we set enwc with network manager as the backend this allows us to
+We set enwc with network manager as the backend this allows us to
 connect to networks
 #+BEGIN_SRC emacs-lisp
 (setq enwc-default-backend 'nm)
 #+END_SRC
-
 * custom usability functions
+** file management
+Adds the ability to open files as root
+https://emacs-fu.blogspot.com/
+#+BEGIN_SRC emacs-lisp
+ (defun djcb-find-file-as-root ()
+  "Like `ido-find-file, but automatically edit the file with
+root-privileges (using tramp/sudo), if the file is not writable by
+user."
+  (interactive)
+  (let ((file (ido-read-file-name "Edit as root: ")))
+    (unless (file-writable-p file)
+      (setq file (concat "/sudo " file)))
+    (find-file file)))
+;; or some other keybinding...
+(global-set-key (kbd "C-x F") 'djcb-find-file-as-root)
+#+END_SRC
+** cut and yank
+The next two functions are taken from 
+https://emacs-fu.blogspot.com/2009/11/copying-lines-without-selecting-them.html
+#+BEGIN_SRC emacs-lisp
+(defadvice kill-region (before slick-cut activate compile)
+  "When called interactively with no active region, kill a single line instead."
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-beginning-position 2)))))
+
+(defadvice kill-ring-save (before slick-copy activate compile)
+  "When called interactively with no active region, copy a single line instead."
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (message "Copied line")
+     (list (line-beginning-position) (line-beginning-position 2)))))
+#+END_SRC
+
+This function will change the behavior of yanking and give us a 
+menu of the kill ring.
+#+BEGIN_SRC emacs-lisp
+(use-package popup-kill-ring
+  :ensure t
+  :bind ("M-y" . popup-kill-ring))
+#+END_SRC
+** controlling windows
 This function halves the window directly above and below
 it is bound to C-c v.
-
 #+BEGIN_SRC emacs-lisp
 (defun halve-other-window-height ()
   "Expand current window to use half of the other window's lines."
@@ -155,7 +245,7 @@ it is bound to C-c v.
 
 (global-set-key (kbd "C-c v") 'halve-other-window-height)
 #+END_SRC
-
+** playing media
 This function plays youtube videos from a url in vlc it is not
 bound to any key combo.
 #+BEGIN_SRC emacs-lisp
