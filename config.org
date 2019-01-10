@@ -8,27 +8,107 @@ should look for executables.
 
 * package management
 MELPA setup and initial packages.
-Eventually, I want to migrate entirely to use-package.
-All new modifications should keep this in mind.
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 
+;;using melpa as repo
 (add-to-list 'package-archives
          '("melpa" . "http://melpa.org/packages/")t)
 
-(unless package-archive-contents
-  (package-refresh-contents))
-
+;;activate the packages
 (package-initialize)
 
-(dolist (p package-list)
-  (when (not (package-installed-p p))
-    (package-install p)))
+;;fetch list of packages availiable
+(unless package-archive-contents
+  (package-refresh-contents))
+#+END_SRC
 
+
+Define a list of needed packages.
+#+BEGIN_SRC emacs-lisp
+(defvar package-list '(all-the-icons 
+                       better-defaults 
+		       dired-ranger 
+		       dired-hacks-utils 
+		       eldoc-eval 
+		       elfeed 
+		       emms 
+		       enwc 
+		       eslint-fix 
+		       exec-path-from-shell 
+		       exwm-surf 
+		       exwm 
+		       flycheck 
+		       flymake-gjshint 
+		       flymake-jshint 
+		       flymake-jslint 
+		       flymake-easy 
+		       geiser 
+		       js2-mode 
+		       js3-mode 
+		       material-theme 
+		       memoize 
+		       nimbus-theme 
+		       org-evil 
+		       org 
+		       monitor 
+		       evil 
+		       goto-chg 
+		       podcaster 
+		       popup-kill-ring 
+		       popup 
+		       pos-tip 
+		       quelpa-use-package 
+		       quelpa 
+		       racket-mode 
+		       faceup 
+		       ranger 
+		       shrink-path 
+		       f 
+		       dash 
+		       terminal-here 
+		       tramp-term 
+		       undo-tree 
+		       use-package 
+		       bind-key 
+		       w3m 
+		       web-mode 
+		       xelb 
+		       cider 
+		       clojure-mode 
+		       elpy 
+		       company 
+		       find-file-in-project 
+		       highlight-indentation 
+		       ivy 
+		       paredit 
+		       pkg-info 
+		       epl 
+		       pyvenv 
+		       queue 
+		       s 
+		       sesman 
+		       slime 
+		       spinner 
+		       yasnippet-snippets 
+		       yasnippet)
+)
+#+END_SRC
+
+;;install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
+#+END_SRC
+
+Eventually, I want to migrate entirely to use-package.
+All new modifications should keep this in mind.
+#+BEGIN_SRC emacs-lisp
 (package-install 'use-package)
 (require 'use-package)
 #+END_SRC
-* looks
+
+* aesthetics
 ** exwm
 The emacs window manager! Just using the default config right now.
 #+BEGIN_SRC emacs-lisp
@@ -44,19 +124,18 @@ Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
 (global-linum-mode t)
 #+END_SRC
-** org
 
+** org
 This makes org mode just a bit more readable. Headings are more
 stylized so they do not look like the text they contain.
-
 #+BEGIN_SRC emacs-lisp
+(load "~/.local/bin/org-bullets")
 (require 'org-bullets)
 (setq org-bullets-bullet-list '("☯" "○" "✸" "✿" "~"))
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
 
 This should darken the background behind code when using org-mode
-
 #+BEGIN_SRC emacs-lisp
 (require 'color)
 (set-face-attribute 'org-block nil :background
@@ -64,6 +143,8 @@ This should darken the background behind code when using org-mode
                      (face-attribute 'default :background) 3))
 #+END_SRC
 
+I want to have a pretty TODO list so that I do not take up the 
+whiteboard in the office.
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords
  '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELED")))
@@ -73,13 +154,11 @@ This should darken the background behind code when using org-mode
    ("WAITING" . "magenta") 
    ("CANCELED" . "red") 
    ("DONE" . "green")))
-
 #+END_SRC
 
 ** theme
 This should install and set the theme to the nimbus theme.
 https://github.com/m-cat/nimbus-theme
-
 #+BEGIN_SRC emacs-lisp
 (require 'nimbus-theme)
 (load-theme 'nimbus t)
@@ -108,17 +187,14 @@ Will need to install slime and sbcl for this.
 #+END_SRC 
 
 ** ORG mode
-
 It is annoying to get asked about this every time. I figure most
 org mode files I will be using will be my own.
-
 #+BEGIN_SRC emacs-lisp
 (setq org-confirm-babel-evaluate nil)
 #+END_SRC
 
 Probably a bit of overkill, but I want to experiment with org-mode's
 ability to make language interop nicely with each other.
-
 #+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
   'org-babel-load-languages
@@ -219,6 +295,7 @@ user."
 ;; or some other keybinding...
 (global-set-key (kbd "C-x F") 'djcb-find-file-as-root)
 #+END_SRC
+
 ** cut and yank
 The next two functions are taken from 
 https://emacs-fu.blogspot.com/2009/11/copying-lines-without-selecting-them.html
@@ -246,6 +323,7 @@ menu of the kill ring.
   :ensure t
   :bind ("M-y" . popup-kill-ring))
 #+END_SRC
+
 ** controlling windows
 This function halves the window directly above and below
 it is bound to C-c v.
