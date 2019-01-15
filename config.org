@@ -12,8 +12,15 @@ MELPA setup and initial packages.
 (require 'package)
 
 ;;using melpa as repo
-(add-to-list 'package-archives
-         '("melpa" . "http://melpa.org/packages/")t)
+(setq package-archives
+  `(,@package-archives
+     ("melpa" . "https://melpa.org/packages/")
+     ;; ("marmalade" . "https://marmalade-repo.org/packages/")
+     ("org" . "https://orgmode.org/elpa/")
+     ;; ("user42" . "https://download.tuxfamily.org/user42/elpa/packages/")
+     ;; ("emacswiki" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/emacswiki/")
+     ;; ("sunrise" . "http://joseito.republika.pl/sunrise-commander/")
+  ))
 
 ;;activate the packages
 (package-initialize)
@@ -23,79 +30,80 @@ MELPA setup and initial packages.
   (package-refresh-contents))
 #+END_SRC
 
-
 Define a list of needed packages.
 #+BEGIN_SRC emacs-lisp
 (defvar package-list '(all-the-icons 
                        better-defaults 
-		       dired-ranger 
-		       dired-hacks-utils 
-		       eldoc-eval 
-		       elfeed 
-		       emms 
-		       enwc 
-		       eslint-fix 
-		       exec-path-from-shell 
-		       exwm-surf 
-		       exwm 
-		       flycheck 
-		       flymake-gjshint 
-		       flymake-jshint 
-		       flymake-jslint 
-		       flymake-easy 
-		       geiser 
-		       js2-mode 
-		       js3-mode 
-		       material-theme 
-		       memoize 
-		       nimbus-theme 
-		       org-evil 
-		       org 
-		       monitor 
-		       evil 
-		       goto-chg 
-		       podcaster 
-		       popup-kill-ring 
-		       popup 
-		       pos-tip 
-		       quelpa-use-package 
-		       quelpa 
-		       racket-mode 
-		       faceup 
-		       ranger 
-		       shrink-path 
-		       f 
-		       dash 
-		       terminal-here 
-		       tramp-term 
-		       undo-tree 
-		       use-package 
-		       bind-key 
-		       w3m 
-		       web-mode 
-		       xelb 
-		       cider 
-		       clojure-mode 
-		       elpy 
-		       company 
-		       find-file-in-project 
-		       highlight-indentation 
-		       ivy 
-		       paredit 
-		       pkg-info 
-		       epl 
-		       pyvenv 
-		       queue 
-		       s 
-		       sesman 
-		       slime 
-		       spinner 
-		       yasnippet-snippets 
-		       yasnippet)
-)
+		                   dired-ranger 
+		                   dired-hacks-utils 
+            		       eldoc-eval 
+		                   elfeed 
+            		       emms 
+		                   enwc 
+		                   eslint-fix 
+		                   exec-path-from-shell 
+		                   exwm-surf 
+	            	       exwm
+                       el-get
+                       use-package-el-get
+                       flycheck 
+		                   flymake-gjshint 
+		                   flymake-jshint 
+		                   flymake-jslint 
+		                   flymake-easy 
+              	       geiser 
+            		       js2-mode 
+		                   js3-mode 
+                       material-theme 
+                       memoize 
+                       nimbus-theme 
+                       org-evil 
+                       org 
+                       monitor 
+                       evil 
+                       goto-chg 
+                       podcaster 
+                       popup-kill-ring 
+                       popup 
+                       pos-tip 
+                       quelpa-use-package 
+                       quelpa 
+                       racket-mode 
+                       faceup 
+                       ranger 
+                       shrink-path 
+                       f 
+                       dash 
+                       terminal-here 
+                       tramp-term 
+                       undo-tree 
+                       use-package 
+                       bind-key 
+                       w3m 
+                       web-mode 
+                       xelb 
+                       cider 
+                       clojure-mode 
+                       elpy 
+                       company 
+                       find-file-in-project 
+                       highlight-indentation 
+                       ivy 
+                       paredit 
+                       pkg-info 
+                       epl 
+                       pyvenv 
+                       queue 
+                       s 
+                       sesman 
+                       slime 
+                       spinner 
+                       yasnippet-snippets 
+                       yasnippet))
 #+END_SRC
 
-;;install the missing packages
+Install any packages in the above list that are not installed already.
+#+BEGIN_SRC 
 (dolist (package package-list)
   (unless (package-installed-p package)
     (package-install package)))
@@ -106,6 +114,13 @@ All new modifications should keep this in mind.
 #+BEGIN_SRC emacs-lisp
 (package-install 'use-package)
 (require 'use-package)
+#+END_SRC
+
+Allow use-package to use el-get
+#+BEGIN_SRC emacs-lisp
+(require 'use-package-el-get)
+(setq use-package-always-ensure nil)
+(use-package-el-get-setup)
 #+END_SRC
 
 * aesthetics
@@ -154,6 +169,7 @@ whiteboard in the office.
    ("WAITING" . "magenta") 
    ("CANCELED" . "red") 
    ("DONE" . "green")))
+
 #+END_SRC
 
 ** theme
@@ -237,6 +253,15 @@ use-package here. If flymake doesn't work change it back to require.
   (add-hook 'js-mode-hook 'flymake-gjshint:load)
 #+END_SRC
 
+** company(autocomplete)
+I want good auto-complete. Company has been recomended, another option is called autocomplete.
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :ensure t
+    :init
+    (add-hook 'after-init-hook 'global-company-mode))
+#+END_SRC
+
 * browser settings
 settings for the w3m browser
 sets duckduckgo as the default browser
@@ -254,6 +279,7 @@ Show the time with time-mode 1
 Show the bat with battery-mode 1
 #+BEGIN_SRC emacs-lisp
 (setq visible-bell 1)
+(column-number-mode 1)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
@@ -279,6 +305,29 @@ connect to networks
 (setq enwc-default-backend 'nm)
 #+END_SRC
 * custom usability functions
+** paren/bracket/curly
+Automatically match {},[],() so my blood pressure stays constant.
+#+BEGIN_SRC emacs-lisp
+(setq electric-pair-pairs '(
+                            (?\( . ?\))
+                            (?\[ . ?\])
+                            (?\{ . ?\})))
+(electric-pair-mode t)
+#+END_SRC
+
+Highlight anything between a valid set of (), {}, or [].
+#+BEGIN_SRC emacs-lisp
+(show-paren-mode 1)
+(setq show-paren-style 'expression)
+#+END_SRC
+
+** indentation
+Set tabs to 2 spaces
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq indent-line-function 'insert-tab)
+#+END_SRC
 ** file management
 Adds the ability to open files as root
 https://emacs-fu.blogspot.com/
