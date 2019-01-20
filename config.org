@@ -181,6 +181,11 @@ https://github.com/m-cat/nimbus-theme
 #+END_SRC
 
 * code settings
+** C style
+#+BEGIN_SRC 
+(setq c-default-style "linux"
+      c-basic-offset 4)
+#+END_SRC
 ** FoxDot mode 
 Foxdot mode needs this. This probably won't work in the
 future, because it is not installed from elpa. It is started with:
