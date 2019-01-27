@@ -17,7 +17,7 @@
  '(enwc-wireless-device (quote wlp3s0))
  '(package-selected-packages
    (quote
-    (enwc el-get use-package-el-get org-bullets use-package yasnippet-snippets slime paredit elpy cider web-mode w3m tramp-term terminal-here shrink-path ranger racket-mode quelpa-use-package popup-kill-ring podcaster org-evil nimbus-theme material-theme js3-mode js2-mode geiser flymake-jslint flymake-jshint flymake-gjshint flycheck exwm-surf exec-path-from-shell eslint-fix emms elfeed eldoc-eval dired-ranger better-defaults all-the-icons))))
+    (magit enwc el-get use-package-el-get org-bullets use-package yasnippet-snippets slime paredit elpy cider web-mode w3m tramp-term terminal-here shrink-path ranger racket-mode quelpa-use-package popup-kill-ring podcaster org-evil nimbus-theme material-theme js3-mode js2-mode geiser flymake-jslint flymake-jshint flymake-gjshint flycheck exwm-surf exec-path-from-shell eslint-fix emms elfeed eldoc-eval dired-ranger better-defaults all-the-icons))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
