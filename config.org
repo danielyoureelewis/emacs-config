@@ -133,7 +133,6 @@ The emacs window manager! Just using the default config right now.
   (require 'exwm-config)
   (exwm-config-default))
 #+END_SRC
-
 ** line numbers
 Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
@@ -303,6 +302,18 @@ much needed adjustments
   (window-divider-mode +1))
 #+END_SRC
 
+enable multi-monitor support
+#+BEGIN_SRC 
+(require 'exwm-randr)
+(setq exwm-randr-workspace-output-plist '(0 "VGA-1" 1 "LVDS-1"))
+(add-hook 'exwm-randr-screen-change-hook
+          (lambda ()
+            (start-process-shell-command
+             "xrandr" nil "xrandr --output VGA-1 --left-of LVDS-1")))
+(exwm-randr-enable)
+(exwm-randr-exit)
+#+END_SRC
+
 * networking
 We set enwc with network manager as the backend this allows us to
 connect to networks
@@ -394,4 +405,18 @@ Set shortcut to cycle buffers
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-c c") 'next-buffer)
 (global-set-key (kbd "C-c x") 'previous-buffer)
+#+END_SRC
+** playing videos
+#+BEGIN_SRC emacs-lisp
+(defun play-youtube-video(url)
+(interactive "sURL: ")
+(shell-command
+  (concat "cvlc " url)))
+
+
+(defun w3m-play-youtube-video ()
+(interactive)
+  (play-youtube-video
+  (w3m-print-this-url (point))))
+(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
 #+END_SRC
