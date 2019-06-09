@@ -1,11 +1,17 @@
-* set path
+* set env
 First we are going to set some path variables. Telling emacs where it
 should look for executables.
 #+BEGIN_SRC emacs-lisp
 (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin/"))
 (setq exec-path (append exec-path '("~/.local/bin/")))
-#+END_SRC 
-
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setenv "SBCL_HOME" "/usr/lib/sbcl")
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq gnus-select-method '(nnimap "imap.gmail.com"))
+(setq smtpmail-default-smtp-server "smtp.gmail.com")
+#+END_SRC
 * package management
 MELPA setup and initial packages.
 #+BEGIN_SRC emacs-lisp
@@ -29,7 +35,6 @@ MELPA setup and initial packages.
 (unless package-archive-contents
   (package-refresh-contents))
 #+END_SRC
-
 Define a list of needed packages.
 #+BEGIN_SRC emacs-lisp
 (defvar package-list '(all-the-icons 
@@ -101,44 +106,35 @@ Define a list of needed packages.
                        yasnippet-snippets 
                        yasnippet))
 #+END_SRC
-
 Install any packages in the above list that are not installed already.
 #+BEGIN_SRC 
 (dolist (package package-list)
   (unless (package-installed-p package)
     (package-install package)))
 #+END_SRC
-
 Eventually, I want to migrate entirely to use-package.
 All new modifications should keep this in mind.
 #+BEGIN_SRC emacs-lisp
 (package-install 'use-package)
 (require 'use-package)
 #+END_SRC
-
 Allow use-package to use el-get
 #+BEGIN_SRC emacs-lisp
 (require 'use-package-el-get)
 (setq use-package-always-ensure nil)
 (use-package-el-get-setup)
 #+END_SRC
-
-* aesthetics
-** exwm
-The emacs window manager! Just using the default config right now.
 #+BEGIN_SRC emacs-lisp
-(use-package exwm
-  :ensure t
-  :config
-  (require 'exwm-config)
-  (exwm-config-default))
+(require 'exwm)
+(require 'exwm-config)
+(exwm-config-default)
 #+END_SRC
+* aesthetics
 ** line numbers
 Turn on line numbers.
 #+BEGIN_SRC emacs-lisp
 (global-linum-mode t)
 #+END_SRC
-
 ** org
 This makes org mode just a bit more readable. Headings are more
 stylized so they do not look like the text they contain.
@@ -148,15 +144,6 @@ stylized so they do not look like the text they contain.
 (setq org-bullets-bullet-list '("☯" "○" "✸" "✿" "~"))
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
-
-This should darken the background behind code when using org-mode
-#+BEGIN_SRC emacs-lisp
-(require 'color)
-(set-face-attribute 'org-block nil :background
-                    (color-darken-name
-                     (face-attribute 'default :background) 3))
-#+END_SRC
-
 I want to have a pretty TODO list so that I do not take up the 
 whiteboard in the office.
 #+BEGIN_SRC emacs-lisp
@@ -170,7 +157,19 @@ whiteboard in the office.
    ("DONE" . "green")))
 
 #+END_SRC
-
+This should darken the background behind code when using org-mode
+#+BEGIN_SRC emacs-lisp
+(require 'color)
+(set-face-attribute 'org-block nil :background
+                    (color-darken-name
+                     (face-attribute 'default :background) 3))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+    org-src-tab-acts-natively t
+    org-confirm-babel-evaluate nil
+    org-edit-src-content-indentation 0)
+#+END_SRC
 ** theme
 This should install and set the theme to the nimbus theme.
 https://github.com/m-cat/nimbus-theme
@@ -178,7 +177,13 @@ https://github.com/m-cat/nimbus-theme
 (require 'nimbus-theme)
 (load-theme 'nimbus t)
 #+END_SRC
-
+** monitor
+#+BEGIN_SRC 
+(require 'exwm-randr)
+(setq exwm-randr-workspace-output-plist '(1 "LVDS1" 0 "VGA1"))
+(add-hook 'exwm-randr-screen-change-hook #'cce/refresh-display-scale)
+(exwm-randr-enable)
+#+END_SRC
 * code settings
 ** C style
 #+BEGIN_SRC 
@@ -205,14 +210,12 @@ Will need to install slime and sbcl for this.
 (load (expand-file-name "~/quicklisp/slime-helper.el")) 
 (setq inferior-lisp-program "sbcl") 
 #+END_SRC 
-
 ** ORG mode
 It is annoying to get asked about this every time. I figure most
 org mode files I will be using will be my own.
 #+BEGIN_SRC emacs-lisp
 (setq org-confirm-babel-evaluate nil)
 #+END_SRC
-
 Probably a bit of overkill, but I want to experiment with org-mode's
 ability to make language interop nicely with each other.
 #+BEGIN_SRC emacs-lisp
@@ -231,22 +234,18 @@ ability to make language interop nicely with each other.
     (picolisp . t)
     (ruby . t)
     (scheme . t)
-    (sed . t)
-    (shell . t)
     (sql . t)
     (emacs-lisp . t)))
+(print "babel loaded langs")
 #+END_SRC
-
 ** elpy
 set elpy, but do not turn it on. It interferes with other packages
-
 #+BEGIN_SRC emacs-lisp
 (defvar myPackages
   '(better-defaults
 	elpy ;; add elpy
 	nimbus-theme))
 #+END_SRC
-
 ** flymake js
 Here we are setting much needed linting for javascript. I am using
 use-package here. If flymake doesn't work change it back to require.
@@ -256,7 +255,6 @@ use-package here. If flymake doesn't work change it back to require.
 (require 'flymake-gjshint)
   (add-hook 'js-mode-hook 'flymake-gjshint:load)
 #+END_SRC
-
 ** company(autocomplete)
 I want good auto-complete. Company has been recomended, another option is called autocomplete.
 #+BEGIN_SRC emacs-lisp
@@ -265,15 +263,24 @@ I want good auto-complete. Company has been recomended, another option is called
     :init
     (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
-
+** html / js / css
+#+BEGIN_SRC emacs-lisp
+(require 'multi-web-mode)
+(setq mweb-default-major-mode 'html-mode)
+(setq mweb-tags 
+  '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+    (js-mode  "<script[^>]*>" "</script>")
+    (css-mode "<style[^>]*>" "</style>")))
+(setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5"))
+(multi-web-global-mode 1)
+#+END_SRC
 * browser settings
 settings for the w3m browser
 sets duckduckgo as the default browser
 #+BEGIN_SRC emacs-lisp
-(require 'w3m-search)
-(setq w3m-search-default-engine "duckduckgo")
+;(require 'w3m-search)
+;(setq w3m-search-default-engine "duckduckgo")
 #+END_SRC
-
 * view settings
 Turn on visable bell
 Disable the menu bar on start up.
@@ -291,7 +298,6 @@ Show the bat with battery-mode 1
 (display-time-mode 1)
 (display-battery-mode 1)
 #+END_SRC
-
 The window divider is useful, but way too big. This function makes some
 much needed adjustments
 #+BEGIN_SRC emacs-lisp
@@ -301,7 +307,6 @@ much needed adjustments
         window-divider-default-right-width 1)
   (window-divider-mode +1))
 #+END_SRC
-
 enable multi-monitor support
 #+BEGIN_SRC 
 (require 'exwm-randr)
@@ -313,14 +318,34 @@ enable multi-monitor support
 (exwm-randr-enable)
 (exwm-randr-exit)
 #+END_SRC
-
 * networking
 We set enwc with network manager as the backend this allows us to
 connect to networks
 #+BEGIN_SRC emacs-lisp
+(shell-command "$(ssh-agent)")
+(shell-command "ssh-add ~/Documents/6430/dyl2a.pem")
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (setq enwc-default-backend 'nm)
 #+END_SRC
 * custom usability functions
+** spelling
+#+BEGIN_SRC emacs-lisp
+(flyspell-mode 1)
+;; NO spell check for embedded snippets
+(defadvice org-mode-flyspell-verify (after org-mode-flyspell-verify-hack activate)
+  (let* ((rlt ad-return-value)
+         (begin-regexp "^[ \t]*#\\+begin_\\(src\\|html\\|latex\\|example\\|quote\\)")
+         (end-regexp "^[ \t]*#\\+end_\\(src\\|html\\|latex\\|example\\|quote\\)")
+         (case-fold-search t)
+         b e)
+    (when ad-return-value
+      (save-excursion
+        (setq b (re-search-backward begin-regexp nil t))
+        (if b (setq e (re-search-forward end-regexp nil t))))
+      (if (and b e (< (point) e)) (setq rlt nil)))
+    (setq ad-return-value rlt)))
+#+END_SRC
 ** paren/bracket/curly
 Automatically match {},[],() so my blood pressure stays constant.
 #+BEGIN_SRC emacs-lisp
@@ -330,13 +355,11 @@ Automatically match {},[],() so my blood pressure stays constant.
                             (?\{ . ?\})))
 (electric-pair-mode t)
 #+END_SRC
-
 Highlight anything between a valid set of (), {}, or [].
 #+BEGIN_SRC emacs-lisp
 (show-paren-mode 1)
 (setq show-paren-style 'expression)
 #+END_SRC
-
 ** indentation
 Set tabs to 2 spaces
 #+BEGIN_SRC emacs-lisp
@@ -360,7 +383,6 @@ user."
 ;; or some other keybinding...
 (global-set-key (kbd "C-x F") 'djcb-find-file-as-root)
 #+END_SRC
-
 ** cut and yank
 The next two functions are taken from 
 https://emacs-fu.blogspot.com/2009/11/copying-lines-without-selecting-them.html
@@ -380,13 +402,104 @@ https://emacs-fu.blogspot.com/2009/11/copying-lines-without-selecting-them.html
      (message "Copied line")
      (list (line-beginning-position) (line-beginning-position 2)))))
 #+END_SRC
-
 This function will change the behavior of yanking and give us a 
 menu of the kill ring.
 #+BEGIN_SRC emacs-lisp
 (use-package popup-kill-ring
   :ensure t
   :bind ("M-y" . popup-kill-ring))
+#+END_SRC
+** paren/bracket/curly
+Automatically match {},[],() so my blood pressure stays constant.
+#+BEGIN_SRC emacs-lisp
+(setq electric-pair-pairs '(
+                            (?\( . ?\))
+                            (?\[ . ?\])
+                            (?\{ . ?\})))
+(electric-pair-mode t)
+#+END_SRC
+Highlight anything between a valid set of (), {}, or [].
+#+BEGIN_SRC emacs-lisp
+(show-paren-mode 1)
+(setq show-paren-style 'expression)
+#+END_SRC
+** indentation
+Set tabs to 2 spaces
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq indent-line-function 'insert-tab)
+#+END_SRC
+** file management
+Adds the ability to open files as root
+https://emacs-fu.blogspot.com/
+#+BEGIN_SRC emacs-lisp
+ (defun djcb-find-file-as-root ()
+  "Like `ido-find-file, but automatically edit the file with
+root-privileges (using tramp/sudo), if the file is not writable by
+user."
+  (interactive)
+  (let ((file (ido-read-file-name "Edit as root: ")))
+    (unless (file-writable-p file)
+      (setq file (concat "/sudo " file)))
+    (find-file file)))
+;; or some other keybinding...
+(global-set-key (kbd "C-x F") 'djcb-find-file-as-root)
+#+END_SRC
+** cut and yank
+The next two functions are taken from 
+https://emacs-fu.blogspot.com/2009/11/copying-lines-without-selecting-them.html
+#+BEGIN_SRC emacs-lisp
+(defadvice kill-region (before slick-cut activate compile)
+  "When called interactively with no active region, kill a single line instead."
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-beginning-position 2)))))
+
+(defadvice kill-ring-save (before slick-copy activate compile)
+  "When called interactively with no active region, copy a single line instead."
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (message "Copied line")
+     (list (line-beginning-position) (line-beginning-position 2)))))
+#+END_SRC
+This function will change the behavior of yanking and give us a 
+menu of the kill ring.
+#+BEGIN_SRC emacs-lisp
+(use-package popup-kill-ring
+  :ensure t
+  :bind ("M-y" . popup-kill-ring))
+#+END_SRC
+** controlling windows
+This function halves the window directly above and below
+it is bound to C-c v.
+#+BEGIN_SRC emacs-lisp
+(defun halve-other-window-height ()
+  "Expand current window to use half of the other window's lines."
+  (interactive)
+  (enlarge-window (/ (window-height (next-window)) 2)))
+
+(global-set-key (kbd "C-c v") 'halve-other-window-height)
+#+END_SRC
+Set shortcut to cycle buffers
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c c") 'next-buffer)
+(global-set-key (kbd "C-c x") 'previous-buffer)
+#+END_SRC
+** playing videos
+#+BEGIN_SRC emacs-lisp
+;(defun play-youtube-video(url)
+;(interactive "sURL: ")
+;(shell-command
+;  (concat "cvlc " url)))
+
+;(defun w3m-play-youtube-video ()
+;(interactive)
+;  (play-youtube-video
+;  (w3m-print-this-url (point))))
+;(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
 #+END_SRC
 
 ** controlling windows
@@ -400,7 +513,6 @@ it is bound to C-c v.
 
 (global-set-key (kbd "C-c v") 'halve-other-window-height)
 #+END_SRC
-
 Set shortcut to cycle buffers
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-c c") 'next-buffer)
@@ -408,15 +520,77 @@ Set shortcut to cycle buffers
 #+END_SRC
 ** playing videos
 #+BEGIN_SRC emacs-lisp
-(defun play-youtube-video(url)
-(interactive "sURL: ")
-(shell-command
-  (concat "cvlc " url)))
+;(defun play-youtube-video(url)
+;(interactive "sURL: ")
+;(shell-command
+;  (concat "cvlc " url)))
 
+;(defun w3m-play-youtube-video ()
+;(interactive)
+;  (play-youtube-video
+;  (w3m-print-this-url (point))))
+;(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
+#+END_SRC
+** lock screen
+This sets C-c l to lock the screen
+#+BEGIN_SRC emacs-lisp
+(defun lock-screen ()
+  "Lock the screen"
+  (interactive)
+  (shell-command "xtrlock"))
+(global-set-key (kbd "C-c l") 'lock-screen)
+#+END_SRC
+** firefox
+#+BEGIN_SRC emacs-lisp
+(defun start-firefox ()
+  "start firefox"
+  (interactive)
+  (async-shell-command "firefox-nightly"))
+(global-set-key (kbd "C-c f") 'start-firefox)
+#+END_SRC
+** xterm
+#+BEGIN_SRC emacs-lisp
+(defun start-termite ()
+  "begin terminal"
+  (interactive)
+  (async-shell-command "xterm -bg rgb:19/19/19 -fg grey"))
+(global-set-key (kbd "C-c t") 'start-termite)
+#+END_SRC
+shutdown correctly
+#+BEGIN_SRC emacs-lisp
+(defun shutdown-computer ()
+  (interactive)
+  (shell-command "sudo shutdown now"))
+(global-set-key (kbd "C-c Q") 'shutdown-computer)
+#+END_SRC
+suspend computer
+#+BEGIN_SRC emacs-lisp
+(defun hibernate-computer ()
+  (interactive)
+  (shell-command "sudo echo mem > /sys/power/state"))
+(global-set-key (kbd "C-c q") 'hibernate-computer)
+#+END_SRC
+** set keybinds
+#+BEGIN_SRC emacs-lisp
+(shell-command "xmodmap ~/.Xmodmap")
+#+END_SRC
+** gnus
+#+BEGIN_SRC emacs-lisp
+(add-hook 'gnus-startup-hook
+  '(lambda ()
+     (gnus-demon-init)
+     (setq gnus-demon-timestep 60)  ;; each timestep is 60 seconds
+     ;; Check for new mail every 1 timestep (1 minute)
+     (gnus-demon-add-handler 'gnus-demon-scan-news 1 t)
 
-(defun w3m-play-youtube-video ()
-(interactive)
-  (play-youtube-video
-  (w3m-print-this-url (point))))
-(global-set-key (kbd "<f9> y") 'w3m-play-youtube-video)
+     ;; Don't crash gnus if disconnected
+     (defadvice gnus-demon-scan-news (around gnus-demon-timeout activate)
+       "Timeout for Gnus."
+       (with-timeout
+       (120 (message "Gnus timed out."))
+     ad-do-it))))
+
+(setq gnus-thread-sort-functions
+      '(gnus-thread-sort-by-number
+        gnus-thread-sort-by-date))
 #+END_SRC
