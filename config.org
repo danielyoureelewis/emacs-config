@@ -43,8 +43,7 @@ Define a list of needed packages.
 		                   dired-hacks-utils 
             		       eldoc-eval 
 		                   elfeed 
-            		       emms 
-		                   enwc 
+            		       emms  
 		                   eslint-fix 
 		                   exec-path-from-shell 
 		                   exwm-surf 
@@ -107,7 +106,7 @@ Define a list of needed packages.
                        yasnippet))
 #+END_SRC
 Install any packages in the above list that are not installed already.
-#+BEGIN_SRC 
+#+BEGIN_SRC emacs-lisp
 (dolist (package package-list)
   (unless (package-installed-p package)
     (package-install package)))
@@ -128,6 +127,11 @@ Allow use-package to use el-get
 (require 'exwm)
 (require 'exwm-config)
 (exwm-config-default)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(require 'whitespace)
+ (setq whitespace-style '(face empty tabs lines-tail trailing))
+ (global-whitespace-mode 0)
 #+END_SRC
 * aesthetics
 ** line numbers
@@ -161,8 +165,7 @@ This should darken the background behind code when using org-mode
 #+BEGIN_SRC emacs-lisp
 (require 'color)
 (set-face-attribute 'org-block nil :background
-                    (color-darken-name
-                     (face-attribute 'default :background) 3))
+                     (face-attribute 'default :background))
 #+END_SRC
 #+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t
@@ -187,8 +190,10 @@ https://github.com/m-cat/nimbus-theme
 * code settings
 ** C style
 #+BEGIN_SRC 
+(setq auto-mode-alist (cons '("\\.upc" . c-mode) auto-mode-alist))
 (setq c-default-style "linux"
       c-basic-offset 4)
+(setq auto-mode-alist (cons '("\\.upc" . c-mode) auto-mode-alist))
 #+END_SRC
 ** FoxDot mode 
 Foxdot mode needs this. This probably won't work in the
@@ -253,7 +258,7 @@ use-package here. If flymake doesn't work change it back to require.
 (setq default-tab-width 4)
 (setq-default c-basic-offset 4)
 (require 'flymake-gjshint)
-  (add-hook 'js-mode-hook 'flymake-gjshint:load)
+(add-hook 'js-mode-hook 'flymake-gjshint:load)
 #+END_SRC
 ** company(autocomplete)
 I want good auto-complete. Company has been recomended, another option is called autocomplete.
@@ -278,8 +283,8 @@ I want good auto-complete. Company has been recomended, another option is called
 settings for the w3m browser
 sets duckduckgo as the default browser
 #+BEGIN_SRC emacs-lisp
-;(require 'w3m-search)
-;(setq w3m-search-default-engine "duckduckgo")
+(require 'w3m-search)
+(setq w3m-search-default-engine "duckduckgo")
 #+END_SRC
 * view settings
 Turn on visable bell
@@ -294,7 +299,7 @@ Show the bat with battery-mode 1
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
-(window-divider-mode 1)
+;(window-divider-mode 1)
 (display-time-mode 1)
 (display-battery-mode 1)
 #+END_SRC
@@ -309,14 +314,14 @@ much needed adjustments
 #+END_SRC
 enable multi-monitor support
 #+BEGIN_SRC 
-(require 'exwm-randr)
-(setq exwm-randr-workspace-output-plist '(0 "VGA-1" 1 "LVDS-1"))
-(add-hook 'exwm-randr-screen-change-hook
-          (lambda ()
-            (start-process-shell-command
-             "xrandr" nil "xrandr --output VGA-1 --left-of LVDS-1")))
-(exwm-randr-enable)
-(exwm-randr-exit)
+;(require 'exwm-randr)
+;(setq exwm-randr-workspace-output-plist '(0 "VGA-1"))
+;(add-hook 'exwm-randr-screen-change-hook
+;          (lambda ()
+;            (start-process-shell-command
+;             "xrandr" nil "xrandr --output VGA-1 --left-of LVDS-1")))
+;(exwm-randr-enable)
+;(exwm-randr-exit)
 #+END_SRC
 * networking
 We set enwc with network manager as the backend this allows us to
@@ -324,9 +329,6 @@ connect to networks
 #+BEGIN_SRC emacs-lisp
 (shell-command "$(ssh-agent)")
 (shell-command "ssh-add ~/Documents/6430/dyl2a.pem")
-#+END_SRC
-#+BEGIN_SRC emacs-lisp
-(setq enwc-default-backend 'nm)
 #+END_SRC
 * custom usability functions
 ** spelling
@@ -364,7 +366,7 @@ Highlight anything between a valid set of (), {}, or [].
 Set tabs to 2 spaces
 #+BEGIN_SRC emacs-lisp
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
+(setq-default tab-width 4)
 (setq indent-line-function 'insert-tab)
 #+END_SRC
 ** file management
